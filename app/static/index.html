@@ -1,0 +1,985 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Math Score Predictor</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, Arial, sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, #dbeafe 0, transparent 35%),
+                radial-gradient(circle at bottom right, #ede9fe 0, transparent 35%),
+                #f8fafc;
+            color: #172033;
+            padding: 40px 20px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 1050px;
+            margin: auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 30px;
+            background: #e0e7ff;
+            color: #4338ca;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 38px;
+            line-height: 1.15;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        /* Main card */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e2e8f0;
+            border-radius: 22px;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
+            overflow: hidden;
+        }
+
+        .card-top {
+            padding: 25px 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .card-top h2 {
+            font-size: 21px;
+            margin-bottom: 6px;
+        }
+
+        .card-top p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .form {
+            padding: 30px;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .section-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #eef2ff;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .section-title h3 {
+            font-size: 16px;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 650;
+            margin-bottom: 7px;
+            color: #334155;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        select,
+        input {
+            width: 100%;
+            height: 48px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 0 14px;
+            font-size: 14px;
+            color: #172033;
+            background: white;
+            outline: none;
+            transition: 0.2s ease;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        select:hover,
+        input:hover {
+            border-color: #94a3b8;
+        }
+
+        .hint {
+            margin-top: 6px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* Score input */
+        .score-wrapper {
+            position: relative;
+        }
+
+        .score-wrapper input {
+            padding-right: 55px;
+        }
+
+        .score-unit {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Button */
+        .actions {
+            margin-top: 8px;
+        }
+
+        .predict-btn {
+            width: 100%;
+            height: 54px;
+            border: none;
+            border-radius: 11px;
+            background: #4f46e5;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+            box-shadow: 0 8px 18px rgba(79, 70, 229, 0.22);
+        }
+
+        .predict-btn:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Result */
+        .result {
+            display: none;
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 15px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            text-align: center;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .result-label {
+            color: #166534;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .score {
+            color: #15803d;
+            font-size: 42px;
+            font-weight: 800;
+        }
+
+        .out-of {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .error {
+            display: none;
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 22px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* Loading */
+        .spinner {
+            display: inline-block;
+            width: 17px;
+            height: 17px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+
+            body {
+                padding: 25px 12px;
+            }
+
+            .header h1 {
+                font-size: 29px;
+            }
+
+            .form {
+                padding: 22px;
+            }
+
+            .card-top {
+                padding: 22px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- Header -->
+    <div class="header">
+
+        <div class="badge">
+            MACHINE LEARNING PROJECT
+        </div>
+
+        <h1>
+            Student Math Score Predictor
+        </h1>
+
+        <p>
+            Enter student information to estimate the mathematics score.
+        </p>
+
+    </div>
+
+
+    <!-- Main Card -->
+    <div class="card">
+
+        <div class="card-top">
+
+            <h2>
+                Student Information
+            </h2>
+
+            <p>
+                Complete the fields below and click predict.
+            </p>
+
+        </div>
+
+
+        <form
+            class="form"
+            id="predictionForm"
+        >
+
+
+            <!-- Section 1 -->
+            <div class="section">
+
+                <div class="section-title">
+
+                    <div class="section-number">
+                        1
+                    </div>
+
+                    <h3>
+                        Personal Information
+                    </h3>
+
+                </div>
+
+
+                <div class="grid">
+
+
+                    <!-- Gender -->
+                    <div class="field">
+
+                        <label for="gender">
+                            Gender
+                            <span class="required">*</span>
+                        </label>
+
+                        <select
+                            id="gender"
+                            required
+                        >
+
+                            <option value="">
+                                Select gender
+                            </option>
+
+                            <option value="female">
+                                Female
+                            </option>
+
+                            <option value="male">
+                                Male
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Race -->
+                    <div class="field">
+
+                        <label for="race_ethnicity">
+                            Race / Ethnicity
+                            <span class="required">*</span>
+                        </label>
+
+                        <select
+                            id="race_ethnicity"
+                            required
+                        >
+
+                            <option value="">
+                                Select group
+                            </option>
+
+                            <option value="group A">
+                                Group A
+                            </option>
+
+                            <option value="group B">
+                                Group B
+                            </option>
+
+                            <option value="group C">
+                                Group C
+                            </option>
+
+                            <option value="group D">
+                                Group D
+                            </option>
+
+                            <option value="group E">
+                                Group E
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Parent Education -->
+                    <div class="field full">
+
+                        <label for="parental_level_of_education">
+
+                            Parental Level of Education
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <select
+                            id="parental_level_of_education"
+                            required
+                        >
+
+                            <option value="">
+                                Select education level
+                            </option>
+
+                            <option value="some high school">
+                                Some High School
+                            </option>
+
+                            <option value="high school">
+                                High School
+                            </option>
+
+                            <option value="some college">
+                                Some College
+                            </option>
+
+                            <option value="associate's degree">
+                                Associate's Degree
+                            </option>
+
+                            <option value="bachelor's degree">
+                                Bachelor's Degree
+                            </option>
+
+                            <option value="master's degree">
+                                Master's Degree
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Section 2 -->
+            <div class="section">
+
+                <div class="section-title">
+
+                    <div class="section-number">
+                        2
+                    </div>
+
+                    <h3>
+                        Student Background
+                    </h3>
+
+                </div>
+
+
+                <div class="grid">
+
+
+                    <!-- Lunch -->
+                    <div class="field">
+
+                        <label for="lunch">
+
+                            Lunch Type
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <select
+                            id="lunch"
+                            required
+                        >
+
+                            <option value="">
+                                Select lunch type
+                            </option>
+
+                            <option value="standard">
+                                Standard
+                            </option>
+
+                            <option value="free/reduced">
+                                Free / Reduced
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Test Preparation -->
+                    <div class="field">
+
+                        <label for="test_preparation_course">
+
+                            Test Preparation
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <select
+                            id="test_preparation_course"
+                            required
+                        >
+
+                            <option value="">
+                                Select preparation status
+                            </option>
+
+                            <option value="none">
+                                None
+                            </option>
+
+                            <option value="completed">
+                                Completed
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Section 3 -->
+            <div class="section">
+
+                <div class="section-title">
+
+                    <div class="section-number">
+                        3
+                    </div>
+
+                    <h3>
+                        Previous Scores
+                    </h3>
+
+                </div>
+
+
+                <div class="grid">
+
+
+                    <!-- Reading -->
+                    <div class="field">
+
+                        <label for="reading_score">
+
+                            Reading Score
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <div class="score-wrapper">
+
+                            <input
+                                type="number"
+                                id="reading_score"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="0 - 100"
+                                required
+                            >
+
+                            <span class="score-unit">
+                                / 100
+                            </span>
+
+                        </div>
+
+                        <span class="hint">
+                            Enter the reading score.
+                        </span>
+
+                    </div>
+
+
+                    <!-- Writing -->
+                    <div class="field">
+
+                        <label for="writing_score">
+
+                            Writing Score
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <div class="score-wrapper">
+
+                            <input
+                                type="number"
+                                id="writing_score"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="0 - 100"
+                                required
+                            >
+
+                            <span class="score-unit">
+                                / 100
+                            </span>
+
+                        </div>
+
+                        <span class="hint">
+                            Enter the writing score.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Button -->
+            <div class="actions">
+
+                <button
+                    type="submit"
+                    class="predict-btn"
+                    id="predictButton"
+                >
+
+                    Predict Math Score
+
+                </button>
+
+            </div>
+
+
+            <!-- Error -->
+            <div
+                class="error"
+                id="error"
+            ></div>
+
+
+            <!-- Result -->
+            <div
+                class="result"
+                id="result"
+            >
+
+                <div class="result-label">
+                    Predicted Mathematics Score
+                </div>
+
+                <div
+                    class="score"
+                    id="score"
+                >
+                    --
+                </div>
+
+                <div class="out-of">
+                    out of 100
+                </div>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+
+    <div class="footer">
+
+        Student Performance ML Application
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const form =
+        document.getElementById(
+            "predictionForm"
+        );
+
+    const button =
+        document.getElementById(
+            "predictButton"
+        );
+
+    const result =
+        document.getElementById(
+            "result"
+        );
+
+    const score =
+        document.getElementById(
+            "score"
+        );
+
+    const error =
+        document.getElementById(
+            "error"
+        );
+
+
+    form.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            // Hide previous messages
+            result.classList.remove("show");
+
+            error.classList.remove("show");
+
+
+            // Get scores
+            const reading =
+                Number(
+                    document.getElementById(
+                        "reading_score"
+                    ).value
+                );
+
+            const writing =
+                Number(
+                    document.getElementById(
+                        "writing_score"
+                    ).value
+                );
+
+
+            // Validate scores
+            if (
+                reading < 0 ||
+                reading > 100 ||
+                writing < 0 ||
+                writing > 100
+            ) {
+
+                error.textContent =
+                    "Scores must be between 0 and 100.";
+
+                error.classList.add("show");
+
+                return;
+
+            }
+
+
+            // Prepare request
+            const data = {
+
+                gender:
+                    document.getElementById(
+                        "gender"
+                    ).value,
+
+                race_ethnicity:
+                    document.getElementById(
+                        "race_ethnicity"
+                    ).value,
+
+                parental_level_of_education:
+                    document.getElementById(
+                        "parental_level_of_education"
+                    ).value,
+
+                lunch:
+                    document.getElementById(
+                        "lunch"
+                    ).value,
+
+                test_preparation_course:
+                    document.getElementById(
+                        "test_preparation_course"
+                    ).value,
+
+                reading_score:
+                    reading,
+
+                writing_score:
+                    writing
+
+            };
+
+
+            // Loading state
+            button.disabled = true;
+
+            button.innerHTML =
+                '<span class="spinner"></span>' +
+                'Predicting...';
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/predict",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(data)
+
+                        }
+                    );
+
+
+                const output =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        output.detail ||
+                        "Unable to make prediction."
+                    );
+
+                }
+
+
+                // Show result
+                score.textContent =
+                    output.predicted_math_score;
+
+                result.classList.add("show");
+
+
+                // Scroll result into view
+                result.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+
+            }
+
+            catch (err) {
+
+                error.textContent =
+                    err.message ||
+                    "Something went wrong. Please try again.";
+
+                error.classList.add("show");
+
+            }
+
+
+            finally {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Predict Math Score";
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
+
